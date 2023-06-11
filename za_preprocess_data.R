@@ -4,7 +4,7 @@
 # under-five (u5) child mortality
 #
 # By Kofiya Technologies (https://kofiyatech.com/)
-#
+# Modified by Siyabonga Mthiyane
 ################################################################################
 
 
@@ -12,8 +12,6 @@
 ################################################################################
 # Import library
 ################################################################################
-
-
 library(readr)      # for loading csv data files
 library(tidyr)      # for data wrangling
 library(dplyr)      # for data transformation
@@ -21,11 +19,10 @@ library(stringr)    # for string/character manipulation
 library(magrittr)   # for pipe operator
 library(rlang)      # to unquote variable name in dplyr::mutate
 library(zeallot)    # to enable R return multiple output values from a function call
-library(RSQLite)
+library(RSQLite)    # for loading .db data files
 ################################################################################
-# Config file paths
+# Loading .db data into workstation and converting it to csv formats
 ################################################################################
-
 filename <- "/home/siyabonga/Documents/Statistics Projects/WATOTO/Data/ZA_2016_DHS_DATABASE/ZA_2016.db"
 sqlite.driver <- dbDriver("SQLite")
 db <- dbConnect(sqlite.driver,
@@ -42,6 +39,23 @@ FILENAME_METADATA_VARIABLE_NAME_HR = dbReadTable(db,'.\\ZA_2016_DHS_12032022_104
 FILENAME_METADATA_VARIABLE_VALUE_KR = dbReadTable(db,'.\\ZA_2016_DHS_12032022_1041_58107_MINI.ZAKR71FL.FlatValuesSpec')   # metadata variable value recode (FlatValuesSpec) obtained from children (KR) metadata table
 FILENAME_METADATA_VARIABLE_VALUE_HR = dbReadTable(db,'.\\ZA_2016_DHS_12032022_1041_58107_MINI.ZAHR71FL.FlatValuesSpec')   # metadata variable value recode (FlatValuesSpec) obtained from children (HR) metadata table
 
+# ------------------------------------------------------------------------------
+# Converting from .db to .csv formats
+# ------------------------------------------------------------------------------
+write.csv(FILENAME_DATA_KR, 
+          "/home/siyabonga/Documents/Statistics Projects/WATOTO/Survival-Analysis/Data/ZA_2016_DHS_DATABASE/FILENAME_DATA_KR.csv", row.names = FALSE)
+write.csv(FILENAME_DATA_HR, 
+          "/home/siyabonga/Documents/Statistics Projects/WATOTO/Survival-Analysis/Data/ZA_2016_DHS_DATABASE/FILENAME_DATA_HR.csv", row.names = FALSE)
+
+write.csv(FILENAME_METADATA_VARIABLE_NAME_KR, 
+          "/home/siyabonga/Documents/Statistics Projects/WATOTO/Survival-Analysis/Data/ZA_2016_DHS_DATABASE/FILENAME_METADATA_VARIABLE_NAME_KR.csv", row.names = FALSE)
+write.csv(FILENAME_METADATA_VARIABLE_NAME_HR, 
+          "/home/siyabonga/Documents/Statistics Projects/WATOTO/Survival-Analysis/Data/ZA_2016_DHS_DATABASE/FILENAME_METADATA_VARIABLE_NAME_HR.csv", row.names = FALSE)
+
+write.csv(FILENAME_METADATA_VARIABLE_VALUE_KR, 
+          "/home/siyabonga/Documents/Statistics Projects/WATOTO/Survival-Analysis/Data/ZA_2016_DHS_DATABASE/FILENAME_METADATA_VARIABLE_VALUE_KR.csv", row.names = FALSE)
+write.csv(FILENAME_METADATA_VARIABLE_VALUE_HR, 
+          "/home/siyabonga/Documents/Statistics Projects/WATOTO/Survival-Analysis/Data/ZA_2016_DHS_DATABASE/FILENAME_METADATA_VARIABLE_VALUE_HR.csv", row.names = FALSE)
 
 ################################################################################
 # 1. Load data
@@ -52,34 +66,30 @@ FILENAME_METADATA_VARIABLE_VALUE_HR = dbReadTable(db,'.\\ZA_2016_DHS_12032022_10
 # ------------------------------------------------------------------------------
 # Load data table - KR
 # ------------------------------------------------------------------------------
-# filepath_data <- file.path(DIR_DATA, FILENAME_DATA_KR)
-# data_kr <- readr::read_csv(file = filepath_data)
+data_kr <- readr::read_csv("/home/siyabonga/Documents/Statistics Projects/WATOTO/Survival-Analysis/Data/ZA_2016_DHS_DATABASE/FILENAME_DATA_KR.csv")
 
 # View data
-FILENAME_DATA_KR %>% head()
+data_kr %>% head()
+data_kr %>% tail()
 
 # Check shape of the data
-dim(FILENAME_DATA_KR)
+dim(data_kr)
 
 # Get a glimpse of the data
-dplyr::glimpse(FILENAME_DATA_KR)
-
+dplyr::glimpse(data_kr)
 
 # ------------------------------------------------------------------------------
 # Load data table - HR
 # ------------------------------------------------------------------------------
-# filepath_data <- file.path(DIR_DATA, FILENAME_DATA_HR)
-# data_hr <- readr::read_csv(file = filepath_data)
-# summary(colnames(data_kr))
-
+data_hr <- readr::read_csv("/home/siyabonga/Documents/Statistics Projects/WATOTO/Survival-Analysis/Data/ZA_2016_DHS_DATABASE/FILENAME_DATA_HR.csv")
 # View data
-FILENAME_DATA_HR %>% head()
+data_hr %>% head()
 
 # Check shape of the data
-dim(FILENAME_DATA_HR)
+dim(data_hr)
 
 # Get a glimpse of the data
-dplyr::glimpse(FILENAME_DATA_HR)
+dplyr::glimpse(data_hr)
 
 ################################################################################
 # 1.2. Merge tables
@@ -158,8 +168,8 @@ metadata_variable_name_hr <- FILENAME_METADATA_VARIABLE_VALUE_HR %>%
 schema_definition_variable <- dplyr::bind_rows(metadata_variable_name_kr, 
                                                metadata_variable_name_hr)
 
-# schema_definition_variable <- schema_definition_variable %>% 
-#   dplyr::select(Name, Label)
+schema_definition_variable <- schema_definition_variable %>%
+  dplyr::select(Name, Label)
 
 schema_definition_variable %>% head()
 schema_definition_variable %>% tail()
